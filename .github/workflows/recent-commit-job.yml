@@ -22,3 +22,4 @@ jobs:
         continue-on-error: true
         name: check recent commit
         run: echo "exists=true" >> $GITHUB_OUTPUT && test -z $(git rev-list -n 1 --after="${{ inputs.after }}"  ${{ github.sha }}) && echo "exists=false" >> $GITHUB_OUTPUT
+      - run: echo "Has recent commit? ${{ steps.check-if-exists.outputs.exists }}"
