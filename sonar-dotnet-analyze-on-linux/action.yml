@@ -4,6 +4,11 @@ inputs:
   project:
     description: Sonar Project
     required: true
+  # secrets inheritance are not supported yet for composite actions: https://github.com/actions/toolkit/issues/1168
+  # otherwise we could avoid these inputs
+  secrets:
+    description: Secrets toJSON
+    required: true
 runs:
   using: composite
   steps:
@@ -30,6 +35,6 @@ runs:
     run: dotnet tool update dotnet-sonarscanner --tool-path ~/sonar/scanner
   - name: Build and analyze
     run: |
-      ~/sonar/scanner/dotnet-sonarscanner begin /k:"${{ inputs.project }}" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+      ~/sonar/scanner/dotnet-sonarscanner begin /k:"${{ inputs.project }}" /d:sonar.token="${{ fromJSON(inputs.secrets).SONAR_TOKEN }}" /d:sonar.host.url="${{ fromJSON(inputs.secrets).SONAR_HOST_URL }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
       dotnet build
-      ~/sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+      ~/sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ fromJSON(inputs.secrets).SONAR_TOKEN }}"
