@@ -1,6 +1,5 @@
 name: Sonar Analyze on Linux
 description: Common sonar steps for analyzing .NET in a Linux Agent
-shell: bash
 inputs:
   project:
     description: Sonar Project
@@ -33,8 +32,10 @@ runs:
       restore-keys: ${{ runner.os }}-sonar-scanner
   - name: Install SonarQube scanner
     if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+    shell: bash
     run: dotnet tool update dotnet-sonarscanner --tool-path ~/sonar/scanner
   - name: Build and analyze
+    shell: bash
     run: |
       ~/sonar/scanner/dotnet-sonarscanner begin /k:"${{ inputs.project }}" /d:sonar.token="${{ fromJSON(inputs.secrets).SONAR_TOKEN }}" /d:sonar.host.url="${{ fromJSON(inputs.secrets).SONAR_HOST_URL }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
       dotnet build
