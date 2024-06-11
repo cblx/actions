@@ -1,5 +1,6 @@
 name: Sonar Analyze on Linux
 description: Common sonar steps for analyzing .NET in a Linux Agent
+shell: bash
 inputs:
   project:
     description: Sonar Project
