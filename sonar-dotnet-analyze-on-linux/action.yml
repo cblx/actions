@@ -1,0 +1,35 @@
+name: Sonar Analyze on Linux
+description: Common sonar steps for analyzing .NET in a Linux Agent
+inputs:
+  project:
+    description: Sonar Project
+    required: true
+runs:
+  using: composite
+  steps:
+  - name: Set up JDK 17
+    uses: actions/setup-java@v4
+    with:
+      java-version: 17
+      distribution: microsoft
+  - name: Cache SonarQube packages
+    uses: actions/cache@v4
+    with:
+      path: ~/sonar/cache
+      key: ${{ runner.os }}-sonar
+      restore-keys: ${{ runner.os }}-sonar
+  - name: Cache SonarQube scanner
+    id: cache-sonar-scanner
+    uses: actions/cache@v4
+    with:
+      path: ~/sonar/scanner
+      key: ${{ runner.os }}-sonar-scanner
+      restore-keys: ${{ runner.os }}-sonar-scanner
+  - name: Install SonarQube scanner
+    if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+    run: dotnet tool update dotnet-sonarscanner --tool-path ~/sonar/scanner
+  - name: Build and analyze
+    run: |
+      ~/sonar/scanner/dotnet-sonarscanner begin /k:"${{ inputs.project }}" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+      dotnet build
+      ~/sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
