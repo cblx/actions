@@ -1,10 +1,10 @@
 on:
   workflow_call:
     inputs:
-      author:
+      ignore:
         required: false
         type: string
-        default: ^.*$
+        default: "*???*"
       after:
         required: false
         type: string
@@ -25,5 +25,5 @@ jobs:
       - id: check-if-exists
         continue-on-error: true
         name: check recent commit
-        run: echo "exists=true" >> $GITHUB_OUTPUT && test -z $(git rev-list -n 1 --after="${{ inputs.after }}" --author="${{ inputs.author }}"  ${{ github.sha }}) && echo "exists=false" >> $GITHUB_OUTPUT
+        run: echo "exists=true" >> $GITHUB_OUTPUT && test -z $(git rev-list -n 1 --after="${{ inputs.after }}" --grep="${{ inputs.ignore }}" --invert-grep ${{ github.sha }}) && echo "exists=false" >> $GITHUB_OUTPUT
       - run: echo "Has recent commit? ${{ steps.check-if-exists.outputs.exists }}"
