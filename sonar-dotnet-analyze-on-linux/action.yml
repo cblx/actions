@@ -1,6 +1,10 @@
 name: Sonar Analyze on Linux
 description: Common sonar steps for analyzing .NET in a Linux Agent
 inputs:
+  additional-args:
+    required: false
+    type: string
+    default: ''
   use-settings-file:
     description: Uses a SonarQube.Analysis.xml file for additional settings
     required: false
@@ -43,13 +47,13 @@ runs:
     if: ${{ inputs.use-settings-file == 'false' }}
     shell: bash
     run: |
-      ~/sonar/scanner/dotnet-sonarscanner begin /k:"${{ inputs.project }}" /d:sonar.token="${{ fromJSON(inputs.secrets).SONAR_TOKEN }}" /d:sonar.host.url="${{ fromJSON(inputs.secrets).SONAR_HOST_URL }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+      ~/sonar/scanner/dotnet-sonarscanner begin /k:"${{ inputs.project }}" /d:sonar.token="${{ fromJSON(inputs.secrets).SONAR_TOKEN }}" /d:sonar.host.url="${{ fromJSON(inputs.secrets).SONAR_HOST_URL }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" ${{ inputs.additional-args }}
       dotnet build
       ~/sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ fromJSON(inputs.secrets).SONAR_TOKEN }}"
   - name: Build and analyze
     if: ${{ inputs.use-settings-file == 'true' }}
     shell: bash
     run: |
-      ~/sonar/scanner/dotnet-sonarscanner begin /k:"${{ inputs.project }}" /d:sonar.token="${{ fromJSON(inputs.secrets).SONAR_TOKEN }}" /d:sonar.host.url="${{ fromJSON(inputs.secrets).SONAR_HOST_URL }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /s:${{ github.workspace }}/SonarQube.Analysis.xml
+      ~/sonar/scanner/dotnet-sonarscanner begin /k:"${{ inputs.project }}" /d:sonar.token="${{ fromJSON(inputs.secrets).SONAR_TOKEN }}" /d:sonar.host.url="${{ fromJSON(inputs.secrets).SONAR_HOST_URL }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" ${{ inputs.additional-args }} /s:${{ github.workspace }}/SonarQube.Analysis.xml
       dotnet build
       ~/sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ fromJSON(inputs.secrets).SONAR_TOKEN }}"
